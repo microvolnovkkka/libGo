@@ -6,16 +6,17 @@ import (
 	"net/http"
 )
 
-type HealthResponse struct {
+type healthResponse struct {
 	Status string `json:"status"`
 }
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
-	resp := HealthResponse{
+	resp := healthResponse{
 		Status: "ok",
 	}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		//потом будем logger по указателю передавать с мейна
 		log.Println("Ошибка записи ответа:", err)
 	}
 }

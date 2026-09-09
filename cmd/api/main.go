@@ -2,19 +2,30 @@ package main
 
 import (
 	"errors"
+	"libgoproj/internal/config"
 	"libgoproj/internal/httpapi"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
+	logHandler := slog.NewTextHandler(os.Stdout, nil) //обработчик логов в текстовый вид в Stdout их оформляет
+	logger := slog.New(logHandler)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", httpapi.HealthHandler)
+
+	cfg := config.Load()
 	srv := http.Server{
-		Addr:    ":8080",
+		Addr:    cfg.HTTPAddr,
 		Handler: mux,
 	}
+
+	logger.Info("Запуск HTTP-сервера", "addr", cfg.HTTPAddr)
 	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal("Ошибка сервера:", err)
+		logger.Error("Ошибка HTTP-сервера", "error", err)
+		//пока что
+		os.Exit(1)
 	}
 }
