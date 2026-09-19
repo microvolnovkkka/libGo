@@ -25,7 +25,9 @@ func main() {
 	logger.Info("Запуск HTTP-сервера", "addr", cfg.HTTPAddr)
 	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("Ошибка HTTP-сервера", "error", err)
-		//пока что
+
+		//пока что ненулевая ошибка
+		// - : завершает немедленно без деферов
 		os.Exit(1)
 	}
 }
