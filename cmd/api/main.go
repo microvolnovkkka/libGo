@@ -16,7 +16,11 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", httpapi.HealthHandler)
 
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		logger.Error("Ошибка конфигурации", "error", err)
+		os.Exit(1)
+	}
 	srv := http.Server{
 		Addr:    cfg.HTTPAddr,
 		Handler: mux,
