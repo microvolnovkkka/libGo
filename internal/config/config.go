@@ -1,17 +1,28 @@
 package config
 
-import "os"
+import (
+	"errors"
+	"os"
+	"strings"
+)
 
 type Config struct {
-	HTTPAddr string
+	HTTPAddr    string
+	DatabaseURL string
 }
 
-func Load() Config {
+func Load() (Config, error) {
 	httpAddr := os.Getenv("HTTP_ADDR")
-	if httpAddr == "" {
+	if strings.TrimSpace(httpAddr) == "" {
 		httpAddr = "127.0.0.1:8080"
 	}
-	return Config{
-		HTTPAddr: httpAddr,
+
+	databaseURL := os.Getenv("DATABASE_URL")
+	if strings.TrimSpace(databaseURL) == "" {
+		return Config{}, errors.New("не задана переменная окружения DATABASE_URL")
 	}
+	return Config{
+		HTTPAddr:    httpAddr,
+		DatabaseURL: databaseURL,
+	}, nil
 }
