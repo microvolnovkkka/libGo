@@ -17,8 +17,7 @@ import (
 func run(logger *slog.Logger) error {
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Error("Ошибка конфигурации", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("загрузка конфигурации: %w", err)
 	}
 	// отмена ctx не закрывает пул соединений, ctx нужен чтобы Ping занимал не более 5 сек
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
