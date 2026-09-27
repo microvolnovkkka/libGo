@@ -12,6 +12,9 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"libgoproj/internal/storage/postgres"
+	"libgoproj/internal/user"
 )
 
 func run(logger *slog.Logger) error {
@@ -35,8 +38,13 @@ func run(logger *slog.Logger) error {
 	cancel()
 	logger.Info("Подключение к PostgreSQL установлено")
 
+	userRepo := postgres.NewUserRepository(pool)
+	userService := user.NewService(userRepo)
+	authHandler := httpapi.NewAuthHandler(userService, logger)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", httpapi.HealthHandler)
+	mux.HandleFunc("POST /users", authHandler.Register)
 
 	srv := http.Server{
 		Addr:    cfg.HTTPAddr,
