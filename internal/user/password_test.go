@@ -37,3 +37,30 @@ func TestHashPasswordRejectsInvalidPassword(t *testing.T) {
 		t.Error("для недопустимого пароля не должен возвращаться хеш")
 	}
 }
+
+func TestVerifyPassword(t *testing.T) {
+	const password = "learn-go-2026"
+
+	encodedHash, err := HashPassword(password)
+	if err != nil {
+		t.Fatalf("создание хеша: %v", err)
+	}
+
+	// Правильный пароль должен совпасть.
+	match, err := VerifyPassword(password, encodedHash)
+	if err != nil || !match {
+		t.Fatalf("правильный пароль: match=%v, err=%v", match, err)
+	}
+
+	// Неверный пароль — обычное несовпадение, без ошибки функции.
+	match, err = VerifyPassword("wrong-password", encodedHash)
+	if err != nil || match {
+		t.Errorf("неверный пароль: match=%v, err=%v", match, err)
+	}
+
+	// Повреждённая строка хеша должна вернуть ошибку.
+	match, err = VerifyPassword(password, "broken-hash")
+	if !errors.Is(err, ErrInvalidPasswordHash) || match {
+		t.Errorf("повреждённый хеш: match=%v, err=%v", match, err)
+	}
+}
