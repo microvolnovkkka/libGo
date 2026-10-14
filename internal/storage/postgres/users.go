@@ -9,6 +9,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type UserRepository struct {
@@ -50,4 +52,36 @@ func (r *UserRepository) Create(
 	}
 
 	return created, nil
+}
+
+// FindByUsername ожидает логин, уже нормализованный сервисом.
+func (r *UserRepository) FindByUsername(
+	ctx context.Context,
+	username string,
+) (user.Credentials, error) {
+	const query = `
+        SELECT id, username, created_at, password_hash
+        FROM users
+        WHERE username = $1
+    `
+
+	var credentials user.Credentials
+
+	err := r.pool.QueryRow(ctx, query, username).Scan(
+		&credentials.User.ID,
+		&credentials.User.Username,
+		&credentials.User.CreatedAt,
+		&credentials.PasswordHash,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return user.Credentials{}, user.ErrUserNotFound
+	}
+	if err != nil {
+		return user.Credentials{}, fmt.Errorf(
+			"поиск пользователя по логину: %w",
+			err,
+		)
+	}
+
+	return credentials, nil
 }

@@ -5,6 +5,7 @@ import "context"
 // какие операции с хранилищем нужны сервису.
 type Repository interface {
 	Create(ctx context.Context, username, passwordHash string) (User, error)
+	FindByUsername(ctx context.Context, username string) (Credentials, error)
 }
 
 type Service struct {
