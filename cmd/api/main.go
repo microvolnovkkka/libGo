@@ -22,9 +22,8 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("загрузка конфигурации: %w", err)
 	}
-	// отмена ctx не закрывает пул соединений, ctx нужен чтобы Ping занимал не более 5 сек
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	
+	
 
 	pool, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
@@ -32,6 +31,8 @@ func run(logger *slog.Logger) error {
 	}
 	defer pool.Close()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if err := pool.Ping(ctx); err != nil {
 		return fmt.Errorf("проверка подключения к PostgreSQL: %w", err)
 	}

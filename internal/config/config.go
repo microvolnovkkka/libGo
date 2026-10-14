@@ -14,7 +14,7 @@ type Config struct {
 func Load() (Config, error) {
 	httpAddr := os.Getenv("HTTP_ADDR")
 	if strings.TrimSpace(httpAddr) == "" {
-		httpAddr = "127.0.0.1:8080"
+		httpAddr = ":8080"
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
