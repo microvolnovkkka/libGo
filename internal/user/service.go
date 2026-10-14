@@ -1,6 +1,10 @@
 package user
 
-import "context"
+import (
+    "context"
+    "errors"
+    "fmt"
+)
 
 // какие операции с хранилищем нужны сервису.
 type Repository interface {
@@ -38,4 +42,38 @@ func (s *Service) Register(
 
 	// В хранилище передаём уже подготовленные данные.
 	return s.repo.Create(ctx, username, passwordHash)
+}
+
+// Authenticate проверяет логин и пароль.
+// При успехе возвращает пользователя без хеша пароля.
+func (s *Service) Authenticate(
+    ctx context.Context,
+    username string,
+    password string,
+) (User, error) {
+    username = NormalizeUsername(username)
+
+    credentials, err := s.repo.FindByUsername(ctx, username)
+    if errors.Is(err, ErrUserNotFound) {
+        return User{}, ErrInvalidCredentials
+    }
+    if err != nil {
+        return User{}, fmt.Errorf(
+            "получение пользователя для входа: %w",
+            err,
+        )
+    }
+
+    match, err := VerifyPassword(password, credentials.PasswordHash)
+    if err != nil {
+        return User{}, fmt.Errorf(
+            "проверка сохранённого хеша пароля: %w",
+            err,
+        )
+    }
+    if !match {
+        return User{}, ErrInvalidCredentials
+    }
+
+    return credentials.User, nil
 }

@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrUsernameTaken = errors.New("логин уже занят")
-	ErrUserNotFound  = errors.New("пользователь не найден")
+	ErrUsernameTaken      = errors.New("логин уже занят")
+	ErrUserNotFound       = errors.New("пользователь не найден")
+	ErrInvalidCredentials = errors.New("неверный логин или пароль")
 )
 
 type User struct {
